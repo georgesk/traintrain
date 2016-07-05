@@ -1,0 +1,7 @@
+\documentclass[10pt]{article}
+\usepackage{devoir, wrapfig,relsize}
+\usepackage{graphpap}
+\usepackage[usenames]{color} 
+\usepackage{chemfig}
+\begin{document}
+\begin{devoir}

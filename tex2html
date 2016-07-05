@@ -1,0 +1,8 @@
+#!/bin/sh
+
+## convertit les échantillons de questions en HTML
+
+tmpfile=$(tempfile -d .)
+
+cat beg $1 end > $tmpfile
+htlatex $tmpfile

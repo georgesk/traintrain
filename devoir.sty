@@ -1,0 +1,207 @@
+%devoir.sty
+%procure les commandes \qestion{} et \subquestion{}
+%et la commande \figeps
+%et l'environnement devoir
+
+\NeedsTeXFormat{LaTeX2e}[1998/06/01]
+\ProvidesPackage{devoir} [2009/01/21 v0.2   Le paquet Devoir.]
+
+\countdef\corrige=0 % \corrige devient synonyme de \count0
+\corrige=0
+
+\DeclareOption{corrige}{\corrige=1\typeout{Mode correction activé^^J}}
+\ProcessOptions*
+
+\RequirePackage[french]{babel}
+\RequirePackage{graphicx,fancybox,vmargin,wrapfig}
+\RequirePackage[utf8x]{inputenc}
+\RequirePackage{lmodern}
+\RequirePackage{nopageno}
+\RequirePackage{longtable}
+\RequirePackage{realcalc}
+
+\setpapersize{A4}
+
+\setmarginsrb{1.2cm}{1cm}{1cm}{0.75cm}%
+             {0.5cm}{5mm}{2mm}{2mm}
+
+%%%% \colquest est la largeur de la colonne des questions
+\newlength{\colquest}
+\setlength{\colquest}{\textwidth}
+\addtolength{\colquest}{-9ex}
+\addtolength{\colquest}{-6\tabcolsep}
+
+%%%% \minipw est la larger de la minipage contenant les questions
+\newlength{\minipw}
+\setlength{\minipw}{\colquest}
+\addtolength{\minipw}{-2\tabcolsep}
+
+%%%% ca, cb, cc sont des compteurs pour les capacités A, B, C
+\newcounter{ca}
+\newcounter{cb}
+\newcounter{cc}
+
+\newcommand{\showc}[1]{
+  \ifnum #1=250 {\small 2.5}
+  \else\ifnum #1=200 {\small 2}
+  \else\ifnum #1=150 {\small 1.5}
+  \else\ifnum #1=100 {\small 1}
+  \else\ifnum #1=50 {\small 0.5}
+  \else \def\ptx{0}\Radd\ptx{\ptx}{#1}\Rmul\ptx\ptx{0.01}\Rtrunc\ptx2\ptx  
+  {\small \ptx}
+  \fi\fi\fi\fi\fi
+}
+
+\newcommand{\coeff}[2]{
+  \ifnum0#1=0
+    ~&
+  \else
+    \addtocounter{#2}{#1}
+    \showc{#1}&
+  \fi
+}
+
+\def\begquest{\ifnum\corrige=0 \begin{minipage}{\minipw} \fi}
+
+\def\endquest{
+  \ifnum\corrige=0 
+     \end{minipage} 
+  \fi
+  \ifhmode
+    \vspace{1mm}\\
+  \fi
+}
+
+
+\newcounter{ctsubquest}
+\setcounter{ctsubquest}{0}
+\newcommand{\subquestion}[4][ ]%
+{ \endquest
+  \ifnum\corrige=0
+  \coeff{#2}{ca}% 
+  \coeff{#3}{cb}% 
+  \coeff{#4}{cc}% 
+  \fi
+  \addtocounter{ctsubquest}{1}%
+  \begquest
+  \textbf{\large \alph{ctsubquest}) {#1}}%
+} 
+
+\newcounter{ctnoquest}
+\setcounter{ctnoquest}{0}
+
+\newcounter{ctquest}
+\setcounter{ctquest}{0}
+
+\newcommand{\question}[4][ ]%
+{ \ifnum\thectquest>0 
+    \endquest
+    \ifnum\corrige=0
+      \hline
+    \else
+      \hrule\vspace{2mm}
+    \fi
+  \else
+    \ifnum\thectnoquest>0 
+      \endquest
+      \ifnum\corrige=0
+        \hline
+      \else
+        \hrule\vspace{2mm}
+      \fi
+    \fi
+  \fi%
+  \addtocounter{ctquest}{1}\setcounter{ctsubquest}{0}%
+  \ifnum\corrige=0
+  &&&\\%%%%%%%%%%%%%%%%%%%%%%% réduire la hauteur de cette ligne !!!!
+  \coeff{#2}{ca}% 
+  \coeff{#3}{cb}% 
+  \coeff{#4}{cc}% 
+  \fi
+  \begquest
+  \textbf{\large Question \arabic{ctquest} : {#1}}\par%
+}
+
+\newcommand{\noquestion}[1][ ]%
+{\ifnum\thectquest>0 \endquest \hline \else\ifnum\thectnoquest>0 \enquest \hline \fi\fi%
+  \addtocounter{ctnoquest}{1}%
+  &&&\\%
+  &&&\begquest\textit{\large #1}\par%
+}
+
+\newcommand\figeps[2][1.0]{\begin{center}%
+\includegraphics[scale=#1]{#2.eps}%
+\end{center}}
+
+
+\def\@auteurs{G. Khaznadar}
+
+\newcommand{\auteurs}[1]{
+  \def\@auteurs{#1}
+}
+
+\newcommand{\reglages}%
+{\author{\@auteurs}%
+\date{}%
+}
+
+\newcommand{\entete}%
+{%
+~\\[-1.5ex]%
+\ifnum\corrige=0
+{\footnotesize Les sujets sont à rendre avec le devoir. %
+Numérotez vos réponses. Attention avant d'écrire au stylo sur %
+la feuille de sujet, il n'y en a pas de rechange.}\\[3ex]%
+\shadowbox{\begin{minipage}%
+{0.35\textwidth}\textbf{Devoir de sciences physiques}\\%
+\raggedleft{\tiny \copyright \@auteurs}%
+\end{minipage}}%
+\shadowbox{\begin{minipage}%
+{0.6\textwidth}\hspace*{1em}Nom, prénom : \hfill Classe : \hspace*{10em}\\~%
+\end{minipage}}\\%
+\fi
+\ifnum\corrige=1
+\begin{center}\shadowbox{\begin{minipage}{0.7\textwidth}
+\textbf{Corrigé de devoir de sciences physiques}\\%
+\raggedleft{\tiny \copyright \@auteurs}%
+\end{minipage}}\end{center}%
+\fi
+}
+
+\newcommand{\expliqueABC}{\ifnum\corrige=0 
+  \fbox{
+    \begin{minipage}[t]{\minipw} \tiny
+      \textbf{A}~: points de connaissance du cours et applications directes~;
+      \textbf{B}~: points liés à des savoirs-faires généraux~; 
+      \textbf{C}~: raisonnement scientifique.
+    \end{minipage}
+  }\vspace{1.5mm}
+\fi
+}
+
+\newenvironment{devoir}%
+{%
+  \reglages
+  \entete
+  \ifnum\corrige=0
+  \begin{longtable}{|*{3}{p{3ex}|}p{\colquest} }%
+  \cline{1-3} A&B&C&\expliqueABC\\ \cline{1-3}\endhead%
+  \cline{1-3}\endfoot
+  \fi
+}
+{ \endquest
+  \ifnum\corrige=0
+  \cline{1-3}
+  \def\ptx{0}\Radd\ptx{\ptx}{\theca} \Rmul\ptx{\ptx}{0.01} \Rtrunc\ptx2\ptx {\tiny \ptx}&
+  \def\ptx{0}\Radd\ptx{\ptx}{\thecb} \Rmul\ptx{\ptx}{0.01} \Rtrunc\ptx2\ptx {\tiny \ptx}&
+  \def\ptx{0}\Radd\ptx{\ptx}{\thecc} \Rmul\ptx{\ptx}{0.01} \Rtrunc\ptx2\ptx {\tiny \ptx}&~
+  \\ \cline{1-3}
+\end{longtable}
+  \fi
+}
+
+\newcommand{\encadre}[2][0.8cm]{%
+\par\vspace{1ex}\fbox{\begin{minipage}[t]{\minipw}%
+#2~\\[#1]~%
+\end{minipage}}%
+}
