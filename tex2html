@@ -2,7 +2,17 @@
 
 ## convertit les échantillons de questions en HTML
 
-tmpfile=$(tempfile -d .)
+mkdir -p html_collection
+rm -f html_collection/file* ## ôte des fichiers temporaires d'avant
+
+tmpfile=$(tempfile -d html_collection)
 
 cat beg $1 end > $tmpfile
-htlatex $tmpfile
+wd=$(pwd)
+
+cd html_collection
+tf=$(basename $tmpfile)
+htlatex $tf
+ls ${tf}* | egrep -v '.*\.html' | xargs rm
+sed 's/'$tf'\.css/common.css/' ${tf}.html > ${tf}.tmp && mv ${tf}.tmp ${tf}.html
+mv ${tf}.html $(echo $(basename $1) | sed 's/tex$/html/')

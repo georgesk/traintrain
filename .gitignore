@@ -37,3 +37,7 @@
 collection
 # fichier généré par index++
 swish++.index
+# fichiers générés par "make all"
+html_collection/*.html
+html_collection/file*
+
