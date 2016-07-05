@@ -6,6 +6,13 @@ module "devoir.sty", et qui utilisent les macros \question.
 """
 
 import sys, os, os.path, re, random
+from shutil import copyfile
+
+def randstr():
+    """
+    renvoie une chaîne aléatoire de 9 chiffres
+    """
+    return str(random.randint(1e8, 1e9))
 
 def findTexFiles(top):
     """
@@ -49,6 +56,7 @@ def decoupe(root, filePref):
     """
     newdir=os.path.join(root,"decoupe",filePref)
     os.makedirs(newdir, exist_ok=True)
+    images={}
     questions=[]
     question=[]
     lines=[]
@@ -60,8 +68,18 @@ def decoupe(root, filePref):
         except:
             continue
     begin=False
-    end=False
     for l in lines:
+        # repérage des fichiers images
+        m=re.match(r"^(.*includegraphics[^{]*\{)([^}]+)(\}.*)$", l)
+        if m: # associe l'ancien nom d'image avec une chaîne aléatoire
+            n="img_"+randstr()
+            images[m.group(2)]=n
+            l=m.group(1)+n+m.group(3)+"\n"
+        m=re.match(r"^(.*figeps[^{]*\{)([^}]+)(\}.*)$", l)
+        if m: # associe l'ancien nom d'image avec une chaîne aléatoire
+            n="img_"+randstr()
+            images[m.group(2)]=n
+            l=m.group(1)+n+m.group(3)+"\n"
         if not begin:
             if re.match (r"\\question",l):
                 question.append(l)
@@ -80,10 +98,18 @@ def decoupe(root, filePref):
                 question.append(l)
     i=1
     for q in questions:
-        with open(os.path.join(root,"decoupe",filePref,"%02d.tex" %i), "w") as outfile:
+        with open(os.path.join(root,"decoupe",filePref,"%02d.tex" %i), "w")\
+             as outfile:
             for l in q:
                 outfile.write(l)
         i=i+1
+    for imname in images:
+        ## enregistre les images en les renommant
+        imgfiles=[i for i in os.listdir(root) if i.startswith(imname)]
+        for i in imgfiles:
+            r, ext= os.path.splitext(i)
+            newfile=os.path.join(root,"decoupe",filePref,images[imname]+ext)
+            copyfile(os.path.join(root,i), newfile)
     return newdir
 
 def collecte(indir, outdir="collection"):
@@ -95,13 +121,14 @@ def collecte(indir, outdir="collection"):
     @param outdir un répertoire cible, par défaut : "collection"
     """
     for f in os.listdir(indir):
-        g="%d.tex" %random.randint(1e8, 1e9) # nom de fichier fait de 9 chiffres
+        if f.startswith("img_"):
+            # c'est une image, recopiée sans modification
+            copyfile(os.path.join(indir,f),os.path.join(outdir,f))
+        g="%s.tex" %randstr()
         while os.path.exists(os.path.join(outdir,g)):
             # refait le tirage au sort si le fichier existe déjà !
-            g="%d.tex" %random.randint(1e8, 1e9)
-        with open(os.path.join(indir,f)) as infile, \
-             open(os.path.join(outdir,g),"w") as outfile:
-            outfile.write(infile.read())
+            g="%s.tex" %randstr()
+        copyfile(os.path.join(indir,f),os.path.join(outdir,g))
     return
 
                 
