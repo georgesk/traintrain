@@ -1,2 +1,6 @@
 AddHandler cgi-script .cgi
 Options +ExecCGI
+# évite d'ouvrir un éditeur spécial pour les fichiers .tex
+# et déclare l'encodage de ces fichiers
+AddCharset UTF-8 .tex
+AddType text/plain .tex

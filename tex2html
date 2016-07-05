@@ -12,7 +12,16 @@ wd=$(pwd)
 
 cd html_collection
 tf=$(basename $tmpfile)
-htlatex $tf
+htlatex $tf "" "" "" "--interaction=nonstopmode"
+
+#if [ -f ${tf}.css ]; then
+#    cp ${tf}.css common.css
+#fi
+
 ls ${tf}* | egrep -v '.*\.html' | xargs rm
-sed 's/'$tf'\.css/common.css/' ${tf}.html > ${tf}.tmp && mv ${tf}.tmp ${tf}.html
-mv ${tf}.html $(echo $(basename $1) | sed 's/tex$/html/')
+
+if [ -f ${tf}.html ]; then
+    sed 's/'$tf'\.css/common.css/' ${tf}.html > ${tf}.tmp && \
+	mv ${tf}.tmp ${tf}.html
+    mv ${tf}.html $(echo $(basename $1) | sed 's/tex$/html/')
+fi

@@ -146,27 +146,8 @@
 }
 
 \newcommand{\entete}%
-{%
-~\\[-1.5ex]%
-\ifnum\corrige=0
-{\footnotesize Les sujets sont à rendre avec le devoir. %
-Numérotez vos réponses. Attention avant d'écrire au stylo sur %
-la feuille de sujet, il n'y en a pas de rechange.}\\[3ex]%
-\shadowbox{\begin{minipage}%
-{0.35\textwidth}\textbf{Devoir de sciences physiques}\\%
-\raggedleft{\tiny \copyright \@auteurs}%
-\end{minipage}}%
-\shadowbox{\begin{minipage}%
-{0.6\textwidth}\hspace*{1em}Nom, prénom : \hfill Classe : \hspace*{10em}\\~%
-\end{minipage}}\\%
-\fi
-\ifnum\corrige=1
-\begin{center}\shadowbox{\begin{minipage}{0.7\textwidth}
-\textbf{Corrigé de devoir de sciences physiques}\\%
-\raggedleft{\tiny \copyright \@auteurs}%
-\end{minipage}}\end{center}%
-\fi
-}
+           {%
+           }
 
 \newcommand{\expliqueABC}{\ifnum\corrige=0 
   \fbox{

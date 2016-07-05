@@ -40,4 +40,6 @@ swish++.index
 # fichiers générés par "make all"
 html_collection/*.html
 html_collection/file*
-
+html_collection/img_*
+# fichiers de journal
+logfile*

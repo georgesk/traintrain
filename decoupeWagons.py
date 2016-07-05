@@ -5,14 +5,19 @@ Recherche des sous-répertoires contenant des fichiers .tex, qui utilisent le
 module "devoir.sty", et qui utilisent les macros \question.
 """
 
-import sys, os, os.path, re, random
+import sys, os, os.path, re, hashlib, tarfile
 from shutil import copyfile
 
-def randstr():
+def hash(s):
     """
-    renvoie une chaîne aléatoire de 9 chiffres
+    fabrique un hash hexadécimal à partir d'une chaîne d'octets
+    @param s une chaîne d'octets (bytes) ou une chaîne unicode qui sera
+    convertie en octets (encodage utf-8)
+    @return une suite de nombres hexadécimaux
     """
-    return str(random.randint(1e8, 1e9))
+    if isinstance(s, str):
+        s=s.encode("utf-8")
+    return hashlib.md5(s).hexdigest()
 
 def findTexFiles(top):
     """
@@ -72,12 +77,12 @@ def decoupe(root, filePref):
         # repérage des fichiers images
         m=re.match(r"^(.*includegraphics[^{]*\{)([^}]+)(\}.*)$", l)
         if m: # associe l'ancien nom d'image avec une chaîne aléatoire
-            n="img_"+randstr()
+            n="img_"+hash(filePref+m.group(2))
             images[m.group(2)]=n
             l=m.group(1)+n+m.group(3)+"\n"
         m=re.match(r"^(.*figeps[^{]*\{)([^}]+)(\}.*)$", l)
         if m: # associe l'ancien nom d'image avec une chaîne aléatoire
-            n="img_"+randstr()
+            n="img_"+hash(filePref+m.group(2))
             images[m.group(2)]=n
             l=m.group(1)+n+m.group(3)+"\n"
         if not begin:
@@ -120,15 +125,33 @@ def collecte(indir, outdir="collection"):
     fichiers .tex, encodés en UTF-8
     @param outdir un répertoire cible, par défaut : "collection"
     """
+    archivables=[]
     for f in os.listdir(indir):
         if f.startswith("img_"):
             # c'est une image, recopiée sans modification
             copyfile(os.path.join(indir,f),os.path.join(outdir,f))
-        g="%s.tex" %randstr()
-        while os.path.exists(os.path.join(outdir,g)):
-            # refait le tirage au sort si le fichier existe déjà !
-            g="%s.tex" %randstr()
-        copyfile(os.path.join(indir,f),os.path.join(outdir,g))
+            archivables.append(f)
+        else:
+            continue
+    for f in os.listdir(indir):
+        if f.startswith("img_"):
+            continue # rien pour les images
+        else:
+            contents=open(os.path.join(indir,f),"rb").read()
+            h=hash(contents)
+            g="%s.tex" %h
+            copyfile(os.path.join(indir,f),os.path.join(outdir,g))
+            wd=os.getcwd()
+            with tarfile.open(os.path.join(outdir,"%s.tgz") %h, "w:gz") as tgz:
+                os.chdir(indir)
+                for a in archivables:
+                    m=re.match(r"img_([0-9a-f]*)", a)
+                    if m and m.group(1).encode("ascii") in contents:
+                        ## on n'archive l'image que si elle est citée dans
+                        ## le fichier .tex
+                        tgz.add(a)
+                tgz.add(f)
+            os.chdir(wd)
     return
 
                 

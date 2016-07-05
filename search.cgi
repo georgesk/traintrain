@@ -160,19 +160,42 @@ while ( <SEARCH> ) {
 	next if /^#/;
 
 	my( $rank, $file, $size, $title ) = split( / /, $_, 4 );
-
-	my $desc = WWW::extract_description( "$DOC_ROOT/$file" );
-	WWW::hyperlink( $desc );
+	chomp($title);
+	my $htmlFile=$file;
+	my $tgzFile=$file;
+	$htmlFile =~ s/collection/html_collection/;
+	$htmlFile =~ s/tex$/html/;
+	$tgzFile  =~ s/tex/tgz/;
+	my $desc="-";
+	if (-e "$DOC_ROOT/$htmlFile") {
+	    $desc = WWW::extract_description( "$DOC_ROOT/$htmlFile" );
+	    WWW::hyperlink( $desc );
+	}
 	$size = int( $size / 1024 );
 	if ( $size ) {
 		$size .= 'K';
 	} else {
 		$size = '&lt;1K';
 	}
-
 	print <<END;
-	<tr valign="top"><td align="right">$rank%&nbsp;&nbsp;</td>
-	<td><dl><dt><b><a href="$file">$title</a></b> ($size)<dd>$desc</dl></td>
+	<tr valign="top">
+	    <td align="right">
+	      $rank%&nbsp;&nbsp;
+	    </td>
+	    <td>
+	      <dl>
+	        <dt><b><a href="$file">$title</a></b> ($size)</dt>
+	        <dd>$desc</dd>
+		<dd><a href="$tgzFile">Archive des sources</a></dd>
+END
+        if (-e "$DOC_ROOT/$htmlFile") {
+	    $title =~ s/tex$/html/;
+	    print "		<dt>Rendu en HTML</dt>\n		<dd><b><a href='$htmlFile'>$title</a></b></dd>";
+        }
+        print <<END;
+	      </dl>
+	      </td>
+	 </tr>
 END
 }
 close( SEARCH ) || die "close: $!";
