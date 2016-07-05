@@ -20,6 +20,9 @@ def findTexFiles(top):
     result={}
     top='.'
     for root, dirs, files in os.walk(top, topdown=False):
+        # on vérifie que le répertoire ne contient pas le mot "collection"
+        if "collection" in root:
+            continue
         for name in files:
             if re.match(r"^.*\.tex$", name):
                 path=os.path.join(root,name)
