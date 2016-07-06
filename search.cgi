@@ -93,7 +93,7 @@ if ( $SOCKET_FILE || $SOCKET_ADDRESS ) {
 		connect( SEARCH, sockaddr_in( $port, $iaddr ) ) ||
 			die "connect: $!";
 	}
-
+ 
 	##
 	# We *MUST* set autoflush for the socket filehandle otherwise the
 	# server thread will hang since I/O buffering will wait for the buffer
@@ -135,10 +135,11 @@ if ( $SOCKET_FILE || $SOCKET_ADDRESS ) {
 print <<END;
 Content-Type: text/html
 
+
 <html>
-<head><title>Search Results</title></head>
+<head><title>Résultats de la recherche</title></head>
 <body>
-<big><b>Search Results</b></big><hr>
+<big><b>Résultats de la recherche</b></big><hr>
 <table border="0" cellpadding="0" cellspacing="0">
 END
 
